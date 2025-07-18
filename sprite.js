@@ -7,10 +7,10 @@ export class SpriteAnimator {
     this.currentFrame = 0;
     this.isPlaying = false;
     this.playbackInterval = null;
-    this.frameDuration = 200; // ms per frame (default 5 FPS)
+    this.frameDuration = 200;
     this.selectedIndex = -1;
 
-    this.backgroundColor = "#ffffff"; // default white background
+    this.backgroundColor = "#ffffff";
     this.showGrid = false;
 
     this.frameList.addEventListener("click", (e) => {
@@ -19,13 +19,9 @@ export class SpriteAnimator {
       }
     });
 
-    // Setup background color picker
     this.setupBackgroundColorPicker();
-
-    // Setup grid toggle button
     this.setupGridToggle();
 
-    // Setup canvas click for hex color
     this.canvas.addEventListener("click", (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const scaleX = this.canvas.width / rect.width;
@@ -110,12 +106,27 @@ export class SpriteAnimator {
             this.drawFrame(0);
             this.selectFrame(0);
           }
+
+          this.updateImageInfoDisplay(file, img); // NEW
           this.dispatchFramesUpdated();
         };
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  updateImageInfoDisplay(file, img) {
+    const infoBox = document.getElementById("imageInfoBox");
+    if (!infoBox) return;
+
+    const kbSize = (file.size / 1024).toFixed(2);
+    infoBox.innerHTML = `
+      <strong>File Name:</strong> ${file.name}<br>
+      <strong>Type:</strong> ${file.type}<br>
+      <strong>Size:</strong> ${kbSize} KB<br>
+      <strong>Original Dimensions:</strong> ${img.width} × ${img.height}px
+    `;
   }
 
   createSingleFrame(img, frameWidth, frameHeight) {
@@ -264,11 +275,10 @@ export class SpriteAnimator {
     const frameWidth = this.frames[0].width;
     const frameHeight = this.frames[0].height;
     const cols = this.frames.length;
-    const rows = 1;
 
     const sheetCanvas = document.createElement("canvas");
     sheetCanvas.width = frameWidth * cols;
-    sheetCanvas.height = frameHeight * rows;
+    sheetCanvas.height = frameHeight;
     const sheetCtx = sheetCanvas.getContext("2d");
 
     for (let i = 0; i < this.frames.length; i++) {

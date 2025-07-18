@@ -20,6 +20,17 @@
       position: relative;
     }
 
+    #watermark {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 0;
+      opacity: 0.35; /* subtle watermark effect */
+      pointer-events: none; /* prevent it from blocking clicks */
+      width: 200px; /* adjust as needed */
+      height: auto;
+    }
+
     .logo-container {
       display: flex;
       justify-content: center;
@@ -131,6 +142,9 @@
 </head>
 <body>
 
+  <!-- Watermark Image -->
+  <img id="watermark" src="images/watermark.png" alt="Watermark">
+
   <div class="logo-container">
     <img id="logo" src="images/logo.png" alt="Logo" />
   </div>
@@ -154,6 +168,9 @@
   <canvas id="spriteCanvas" width="32" height="32"></canvas>
 
   <p>Clicked Pixel Color: <span id="hexColorDisplay">#FFFFFF</span></p>
+  <div id="imageInfoBox" style="border: 1px solid #ccc; padding: 10px; font-size: 14px; margin-top: 10px;">
+    <strong>Image Info:</strong> No image loaded yet.
+  </div>
 
   <ul id="frameList"></ul>
 
