@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,18 +14,37 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 10px;
       padding: 40px 20px;
       position: relative;
     }
+
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    #logo {
+      width: 140px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 20px #0a4fffcc;
+      background: #121212;
+      user-select: none;
+    }
+
     h1 {
       font-weight: 600;
       font-size: 1.8rem;
       color: #f0f0f0;
       text-shadow: 0 0 10px #0af;
       margin-bottom: 5px;
+      text-align: center;
     }
+
     input[type="file"] {
       padding: 10px 15px;
       font-size: 1rem;
@@ -37,6 +56,7 @@
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
       box-shadow: 0 0 5px #0af33a20;
     }
+
     input[type="file"]:hover,
     input[type="file"]:focus {
       background: #0a4fff;
@@ -44,6 +64,7 @@
       outline: none;
       color: white;
     }
+
     #spriteCanvas {
       image-rendering: pixelated;
       border: 2px solid #0a4fff;
@@ -53,6 +74,7 @@
       height: 128px;
       box-shadow: 0 0 20px #0a4fff99;
     }
+
     .controls {
       display: flex;
       gap: 10px;
@@ -60,6 +82,7 @@
       justify-content: center;
       align-items: center;
     }
+
     button {
       background: #0a4fff;
       border: none;
@@ -71,11 +94,13 @@
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
       box-shadow: 0 0 10px #0a4fffcc;
     }
+
     button:hover, button:focus {
       background: #0059cc;
       box-shadow: 0 0 15px #0059cccc;
       outline: none;
     }
+
     ul#frameList {
       list-style: none;
       padding: 0;
@@ -88,6 +113,7 @@
       background: #222;
       box-shadow: 0 0 10px #0a4fff99;
     }
+
     ul#frameList li {
       padding: 8px 10px;
       border-bottom: 1px solid #0a4fff33;
@@ -95,6 +121,7 @@
       color: #ccc;
       user-select: none;
     }
+
     ul#frameList li.selected {
       background: #0a4fff;
       color: white;
@@ -103,14 +130,21 @@
   </style>
 </head>
 <body>
+
+  <!-- Logo centered above title -->
+  <div class="logo-container">
+    <img id="logo" src="images/logo.png" alt="Logo" />
+  </div>
+
   <h1>Sprite Animation Player</h1>
 
   <input type="file" id="upload" accept="image/png" multiple />
-  <input type="checkbox" id="spriteSheetCheckbox" /> *Splice - Select option before upload.
-<label for="backgroundColorPicker">Background Color:</label>
-<input type="color" id="backgroundColorPicker" />
+  <input type="checkbox" id="spriteSheetCheckbox" /> *Splice - Select option before upload to splice sheets*
+  <br></br>
+  <label for="backgroundColorPicker">Background Color:</label>
+  <input type="color" id="backgroundColorPicker" />
 
-<button id="toggleGridBtn">Show Grid</button>
+  <button id="toggleGridBtn">Show Grid</button>
 
   <div class="controls">
     <button id="playPauseBtn">Play</button>
@@ -125,11 +159,9 @@
 
   <!-- Include JSZip CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
-
   <script type="module" src="./sprite.js"></script>
 
   <script>
-    // Enable or disable export buttons based on frames count
     const exportSheetBtn = document.getElementById("exportSheetBtn");
     const exportFramesZipBtn = document.getElementById("exportFramesZipBtn");
 
@@ -138,7 +170,6 @@
       exportFramesZipBtn.disabled = framesCount === 0;
     }
 
-    // Listen for custom event from sprite.js to update buttons
     document.addEventListener('framesUpdated', e => {
       updateExportButtons(e.detail.count);
     });
