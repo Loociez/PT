@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sprite Animation Player</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #121212, #1e1e1e);
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 40px 20px;
+      position: relative;
+    }
+    h1 {
+      font-weight: 600;
+      font-size: 1.8rem;
+      color: #f0f0f0;
+      text-shadow: 0 0 10px #0af;
+      margin-bottom: 5px;
+    }
+    input[type="file"] {
+      padding: 10px 15px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      background: #272727;
+      color: #eee;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 5px #0af33a20;
+    }
+    input[type="file"]:hover,
+    input[type="file"]:focus {
+      background: #0a4fff;
+      box-shadow: 0 0 10px #0a4fffcc;
+      outline: none;
+      color: white;
+    }
+    #spriteCanvas {
+      image-rendering: pixelated;
+      border: 2px solid #0a4fff;
+      border-radius: 8px;
+      background: transparent;
+      width: 128px;
+      height: 128px;
+      box-shadow: 0 0 20px #0a4fff99;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    button {
+      background: #0a4fff;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 0 10px #0a4fffcc;
+    }
+    button:hover, button:focus {
+      background: #0059cc;
+      box-shadow: 0 0 15px #0059cccc;
+      outline: none;
+    }
+    ul#frameList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 140px;
+      overflow-y: auto;
+      width: 160px;
+      border: 1px solid #0a4fff;
+      border-radius: 8px;
+      background: #222;
+      box-shadow: 0 0 10px #0a4fff99;
+    }
+    ul#frameList li {
+      padding: 8px 10px;
+      border-bottom: 1px solid #0a4fff33;
+      cursor: pointer;
+      color: #ccc;
+      user-select: none;
+    }
+    ul#frameList li.selected {
+      background: #0a4fff;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sprite Animation Player</h1>
+
+  <input type="file" id="upload" accept="image/png" multiple />
+  <input type="checkbox" id="spriteSheetCheckbox" /> *Splice - Select option before upload.
+<label for="backgroundColorPicker">Background Color:</label>
+<input type="color" id="backgroundColorPicker" />
+
+<button id="toggleGridBtn">Show Grid</button>
+
+  <div class="controls">
+    <button id="playPauseBtn">Play</button>
+    <button id="removeFrameBtn" disabled>Remove Selected Frame</button>
+    <button id="exportSheetBtn" disabled>Export Sprite Sheet</button>
+    <button id="exportFramesZipBtn" disabled>Download Frames Individually</button>
+  </div>
+
+  <canvas id="spriteCanvas" width="32" height="32"></canvas>
+
+  <ul id="frameList"></ul>
+
+  <!-- Include JSZip CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+
+  <script type="module" src="./sprite.js"></script>
+
+  <script>
+    // Enable or disable export buttons based on frames count
+    const exportSheetBtn = document.getElementById("exportSheetBtn");
+    const exportFramesZipBtn = document.getElementById("exportFramesZipBtn");
+
+    function updateExportButtons(framesCount) {
+      exportSheetBtn.disabled = framesCount === 0;
+      exportFramesZipBtn.disabled = framesCount === 0;
+    }
+
+    // Listen for custom event from sprite.js to update buttons
+    document.addEventListener('framesUpdated', e => {
+      updateExportButtons(e.detail.count);
+    });
+  </script>
+</body>
+</html>
