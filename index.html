@@ -131,7 +131,6 @@
 </head>
 <body>
 
-  <!-- Logo centered above title -->
   <div class="logo-container">
     <img id="logo" src="images/logo.png" alt="Logo" />
   </div>
@@ -149,9 +148,12 @@
     <button id="removeFrameBtn" disabled>Remove Selected Frame</button>
     <button id="exportSheetBtn" disabled>Export Sprite Sheet</button>
     <button id="exportFramesZipBtn" disabled>Download Frames Individually</button>
+    <button id="rotateBtn" disabled>Rotate</button>
   </div>
 
   <canvas id="spriteCanvas" width="32" height="32"></canvas>
+
+  <p>Clicked Pixel Color: <span id="hexColorDisplay">#FFFFFF</span></p>
 
   <ul id="frameList"></ul>
 
@@ -162,10 +164,12 @@
   <script>
     const exportSheetBtn = document.getElementById("exportSheetBtn");
     const exportFramesZipBtn = document.getElementById("exportFramesZipBtn");
+    const rotateBtn = document.getElementById("rotateBtn");
 
     function updateExportButtons(framesCount) {
       exportSheetBtn.disabled = framesCount === 0;
       exportFramesZipBtn.disabled = framesCount === 0;
+      rotateBtn.disabled = framesCount === 0;
     }
 
     document.addEventListener('framesUpdated', e => {

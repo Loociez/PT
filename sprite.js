@@ -24,13 +24,24 @@ export class SpriteAnimator {
 
     // Setup grid toggle button
     this.setupGridToggle();
+
+    // Setup canvas click for hex color
+    this.canvas.addEventListener("click", (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const scaleX = this.canvas.width / rect.width;
+      const scaleY = this.canvas.height / rect.height;
+      const x = Math.floor((e.clientX - rect.left) * scaleX);
+      const y = Math.floor((e.clientY - rect.top) * scaleY);
+      const pixel = this.ctx.getImageData(x, y, 1, 1).data;
+      const hex = "#" + [...pixel].slice(0, 3).map(c => c.toString(16).padStart(2, "0")).join("");
+      document.getElementById("hexColorDisplay").textContent = hex.toUpperCase();
+    });
   }
 
   setupBackgroundColorPicker() {
     const colorInput = document.getElementById("backgroundColorPicker");
     if (!colorInput) return;
 
-    // Initialize color picker with default color
     colorInput.value = this.backgroundColor;
 
     colorInput.addEventListener("input", (e) => {
@@ -49,7 +60,6 @@ export class SpriteAnimator {
       this.drawFrame(this.selectedIndex);
     });
 
-    // Set initial button text
     gridToggleBtn.textContent = "Show Grid";
   }
 
@@ -146,12 +156,11 @@ export class SpriteAnimator {
     if (!this.showGrid) return;
 
     const { width, height } = this.canvas;
-    const gridSize = 1; // 1x1 pixel grid
+    const gridSize = 1;
 
     this.ctx.strokeStyle = "rgba(0,0,0,0.1)";
     this.ctx.lineWidth = 0.5;
 
-    // Draw vertical lines every pixel
     for (let x = 0; x <= width; x += gridSize) {
       this.ctx.beginPath();
       this.ctx.moveTo(x + 0.5, 0);
@@ -159,7 +168,6 @@ export class SpriteAnimator {
       this.ctx.stroke();
     }
 
-    // Draw horizontal lines every pixel
     for (let y = 0; y <= height; y += gridSize) {
       this.ctx.beginPath();
       this.ctx.moveTo(0, y + 0.5);
@@ -170,7 +178,6 @@ export class SpriteAnimator {
 
   drawFrame(index) {
     if (index < 0 || index >= this.frames.length) {
-      // Clear canvas with background color if no frame
       this.ctx.fillStyle = this.backgroundColor;
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       return;
@@ -315,6 +322,24 @@ export class SpriteAnimator {
     });
   }
 
+  rotateSelectedFrame90() {
+    if (this.selectedIndex === -1) return;
+    const oldCanvas = this.frames[this.selectedIndex];
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = oldCanvas.height;
+    tempCanvas.height = oldCanvas.width;
+    const tempCtx = tempCanvas.getContext("2d");
+
+    tempCtx.save();
+    tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+    tempCtx.rotate(Math.PI / 2);
+    tempCtx.drawImage(oldCanvas, -oldCanvas.width / 2, -oldCanvas.height / 2);
+    tempCtx.restore();
+
+    this.frames[this.selectedIndex] = tempCanvas;
+    this.drawFrame(this.selectedIndex);
+  }
+
   dispatchFramesUpdated() {
     const event = new CustomEvent('framesUpdated', { detail: { count: this.frames.length } });
     document.dispatchEvent(event);
@@ -324,41 +349,16 @@ export class SpriteAnimator {
 window.addEventListener("DOMContentLoaded", () => {
   const animator = new SpriteAnimator("spriteCanvas", "frameList");
 
-  const uploadInput = document.getElementById("upload");
-  if (uploadInput) {
-    uploadInput.addEventListener("change", (e) => {
-      animator.addFramesFromFiles(e.target.files);
-      e.target.value = null;
-    });
-  }
+  document.getElementById("upload")?.addEventListener("change", (e) => {
+    animator.addFramesFromFiles(e.target.files);
+    e.target.value = null;
+  });
 
-  const playPauseBtn = document.getElementById("playPauseBtn");
-  if (playPauseBtn) {
-    playPauseBtn.addEventListener("click", () => {
-      animator.togglePlayPause();
-    });
-  }
-
-  const removeFrameBtn = document.getElementById("removeFrameBtn");
-  if (removeFrameBtn) {
-    removeFrameBtn.addEventListener("click", () => {
-      animator.removeSelectedFrame();
-    });
-  }
-
-  const exportSheetBtn = document.getElementById("exportSheetBtn");
-  if (exportSheetBtn) {
-    exportSheetBtn.addEventListener("click", () => {
-      animator.exportSpriteSheet();
-    });
-  }
-
-  const exportFramesBtn = document.getElementById("exportFramesBtn");
-  if (exportFramesBtn) {
-    exportFramesBtn.addEventListener("click", () => {
-      animator.exportFramesIndividually();
-    });
-  }
+  document.getElementById("playPauseBtn")?.addEventListener("click", () => animator.togglePlayPause());
+  document.getElementById("removeFrameBtn")?.addEventListener("click", () => animator.removeSelectedFrame());
+  document.getElementById("exportSheetBtn")?.addEventListener("click", () => animator.exportSpriteSheet());
+  document.getElementById("exportFramesZipBtn")?.addEventListener("click", () => animator.exportFramesIndividually());
+  document.getElementById("rotateBtn")?.addEventListener("click", () => animator.rotateSelectedFrame90());
 
   const fpsInput = document.getElementById("fpsInput");
   if (fpsInput) {
