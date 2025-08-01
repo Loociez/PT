@@ -25,9 +25,9 @@
       top: 0;
       right: 0;
       z-index: 0;
-      opacity: 0.35; /* subtle watermark effect */
-      pointer-events: none; /* prevent it from blocking clicks */
-      width: 200px; /* adjust as needed */
+      opacity: 0.35;
+      pointer-events: none;
+      width: 200px;
       height: auto;
     }
 
@@ -142,7 +142,6 @@
 </head>
 <body>
 
-  <!-- Watermark Image -->
   <img id="watermark" src="images/watermark.png" alt="Watermark">
 
   <div class="logo-container">
@@ -150,10 +149,11 @@
   </div>
 
   <input type="file" id="upload" accept="image/png" multiple />
-  <input type="checkbox" id="spriteSheetCheckbox" /> *Splice - Select option before upload to splice sheets*
-  <br></br>
+  <label><input type="checkbox" id="spriteSheetCheckbox" /> *Splice - Select option before upload to splice sheets*</label>
+  <br>
   <label for="backgroundColorPicker">Background Color:</label>
   <input type="color" id="backgroundColorPicker" />
+  <label><input type="checkbox" id="preserveTransparencyCheckbox" checked> Preserve Transparency</label>
 
   <button id="toggleGridBtn">Show Grid</button>
 
@@ -174,7 +174,6 @@
 
   <ul id="frameList"></ul>
 
-  <!-- Include JSZip CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
   <script type="module" src="./sprite.js"></script>
 
