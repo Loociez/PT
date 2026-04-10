@@ -13,6 +13,10 @@ export class SpriteAnimator {
     this.backgroundColor = "#ffffff";
     this.showGrid = false;
 
+    // ✅ NEW
+    this.frameWidthInput = document.getElementById("frameWidthInput");
+    this.frameHeightInput = document.getElementById("frameHeightInput");
+
     this.frameList.addEventListener("click", (e) => {
       if (e.target.tagName === "LI") {
         this.selectFrame(parseInt(e.target.dataset.index));
@@ -32,6 +36,15 @@ export class SpriteAnimator {
       const hex = "#" + [...pixel].slice(0, 3).map(c => c.toString(16).padStart(2, "0")).join("");
       document.getElementById("hexColorDisplay").textContent = hex.toUpperCase();
     });
+  }
+
+  // ✅ NEW
+  getFrameWidth() {
+    return parseInt(this.frameWidthInput?.value) || 32;
+  }
+
+  getFrameHeight() {
+    return parseInt(this.frameHeightInput?.value) || 32;
   }
 
   setupBackgroundColorPicker() {
@@ -93,10 +106,15 @@ export class SpriteAnimator {
         const img = new Image();
         img.onload = () => {
           let newFrames;
+
+          // ✅ CHANGED HERE
+          const fw = this.getFrameWidth();
+          const fh = this.getFrameHeight();
+
           if (isSpriteSheet) {
-            newFrames = this.sliceSpriteSheet(img, 32, 32);
+            newFrames = this.sliceSpriteSheet(img, fw, fh);
           } else {
-            newFrames = [this.createSingleFrame(img, 32, 32)];
+            newFrames = [this.createSingleFrame(img, fw, fh)];
           }
 
           this.frames.push(...newFrames);
@@ -107,7 +125,7 @@ export class SpriteAnimator {
             this.selectFrame(0);
           }
 
-          this.updateImageInfoDisplay(file, img); // NEW
+          this.updateImageInfoDisplay(file, img);
           this.dispatchFramesUpdated();
         };
         img.src = e.target.result;
@@ -300,54 +318,53 @@ export class SpriteAnimator {
   }
 
   exportFramesIndividually() {
-  if (this.frames.length === 0) return;
+    if (this.frames.length === 0) return;
 
-  if (typeof JSZip === "undefined") {
-    alert("JSZip library is required for exporting frames individually.");
-    return;
+    if (typeof JSZip === "undefined") {
+      alert("JSZip library is required for exporting frames individually.");
+      return;
+    }
+
+    const zip = new JSZip();
+    const preserveTransparency = document.getElementById("preserveTransparencyCheckbox")?.checked;
+    const backgroundColor = document.getElementById("backgroundColorPicker")?.value || "#ffffff";
+
+    this.frames.forEach((frameCanvas, index) => {
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = frameCanvas.width;
+      tempCanvas.height = frameCanvas.height;
+      const ctx = tempCanvas.getContext("2d");
+
+      if (preserveTransparency) {
+        ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+      } else {
+        ctx.fillStyle = backgroundColor;
+        ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+      }
+
+      ctx.drawImage(frameCanvas, 0, 0);
+
+      const dataURL = tempCanvas.toDataURL("image/png");
+      const base64Data = dataURL.split(',')[1];
+      const binaryData = atob(base64Data);
+      const arrayBuffer = new Uint8Array(binaryData.length);
+      for (let i = 0; i < binaryData.length; i++) {
+        arrayBuffer[i] = binaryData.charCodeAt(i);
+      }
+      zip.file(`frame_${index + 1}.png`, arrayBuffer);
+    });
+
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      const url = URL.createObjectURL(content);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "frames.zip";
+      a.click();
+      URL.revokeObjectURL(url);
+    }).catch((err) => {
+      alert("Error generating ZIP file: " + err.message);
+    });
   }
-
-  const zip = new JSZip();
-  const preserveTransparency = document.getElementById("preserveTransparencyCheckbox")?.checked;
-  const backgroundColor = document.getElementById("backgroundColorPicker")?.value || "#ffffff";
-
-  this.frames.forEach((frameCanvas, index) => {
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = frameCanvas.width;
-    tempCanvas.height = frameCanvas.height;
-    const ctx = tempCanvas.getContext("2d");
-
-    if (preserveTransparency) {
-      ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height); // transparent
-    } else {
-      ctx.fillStyle = backgroundColor;
-      ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); // solid bg
-    }
-
-    ctx.drawImage(frameCanvas, 0, 0);
-
-    const dataURL = tempCanvas.toDataURL("image/png");
-    const base64Data = dataURL.split(',')[1];
-    const binaryData = atob(base64Data);
-    const arrayBuffer = new Uint8Array(binaryData.length);
-    for (let i = 0; i < binaryData.length; i++) {
-      arrayBuffer[i] = binaryData.charCodeAt(i);
-    }
-    zip.file(`frame_${index + 1}.png`, arrayBuffer);
-  });
-
-  zip.generateAsync({ type: "blob" }).then((content) => {
-    const url = URL.createObjectURL(content);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "frames.zip";
-    a.click();
-    URL.revokeObjectURL(url);
-  }).catch((err) => {
-    alert("Error generating ZIP file: " + err.message);
-  });
-}
-
 
   rotateSelectedFrame90() {
     if (this.selectedIndex === -1) return;

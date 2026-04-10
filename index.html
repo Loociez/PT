@@ -150,7 +150,19 @@
 
   <input type="file" id="upload" accept="image/png" multiple />
   <label><input type="checkbox" id="spriteSheetCheckbox" /> *Splice - Select option before upload to splice sheets*</label>
+
+  <!-- ✅ NEW: FRAME SIZE CONTROLS -->
+  <div class="controls">
+    <label>Frame W:
+      <input type="number" id="frameWidthInput" value="32" min="1" style="width:60px;">
+    </label>
+    <label>Frame H:
+      <input type="number" id="frameHeightInput" value="32" min="1" style="width:60px;">
+    </label>
+  </div>
+
   <br>
+
   <label for="backgroundColorPicker">Background Color:</label>
   <input type="color" id="backgroundColorPicker" />
   <label><input type="checkbox" id="preserveTransparencyCheckbox" checked> Preserve Transparency</label>
