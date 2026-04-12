@@ -151,7 +151,7 @@
   <input type="file" id="upload" accept="image/png" multiple />
   <label><input type="checkbox" id="spriteSheetCheckbox" /> *Splice - Select option before upload to splice sheets*</label>
 
-  <!-- ✅ NEW: FRAME SIZE CONTROLS -->
+  <!-- FRAME SIZE -->
   <div class="controls">
     <label>Frame W:
       <input type="number" id="frameWidthInput" value="32" min="1" style="width:60px;">
@@ -159,6 +159,21 @@
     <label>Frame H:
       <input type="number" id="frameHeightInput" value="32" min="1" style="width:60px;">
     </label>
+  </div>
+
+  <!-- ✅ NEW CONTROLS -->
+  <div class="controls">
+    <label>Start Frame:
+      <input type="number" id="startFrameInput" value="1" min="1" style="width:60px;">
+    </label>
+
+    <label>
+      <input type="checkbox" id="loopCheckbox" checked> Loop
+    </label>
+
+    <button id="prevFrameBtn">Prev</button>
+    <button id="nextFrameBtn">Next</button>
+    <button id="resetBtn">Reset</button>
   </div>
 
   <br>

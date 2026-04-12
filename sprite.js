@@ -17,6 +17,30 @@ export class SpriteAnimator {
     this.frameWidthInput = document.getElementById("frameWidthInput");
     this.frameHeightInput = document.getElementById("frameHeightInput");
 
+    // ✅ NEW CONTROLS
+    this.startFrameInput = document.getElementById("startFrameInput");
+    this.loop = true;
+
+    document.getElementById("loopCheckbox")?.addEventListener("change", (e) => {
+      this.loop = e.target.checked;
+    });
+
+    document.getElementById("prevFrameBtn")?.addEventListener("click", () => {
+      if (!this.frames.length) return;
+      this.currentFrame = (this.currentFrame - 1 + this.frames.length) % this.frames.length;
+      this.selectFrame(this.currentFrame);
+    });
+
+    document.getElementById("nextFrameBtn")?.addEventListener("click", () => {
+      if (!this.frames.length) return;
+      this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+      this.selectFrame(this.currentFrame);
+    });
+
+    document.getElementById("resetBtn")?.addEventListener("click", () => {
+      this.reset();
+    });
+
     this.frameList.addEventListener("click", (e) => {
       if (e.target.tagName === "LI") {
         this.selectFrame(parseInt(e.target.dataset.index));
@@ -75,11 +99,25 @@ export class SpriteAnimator {
   startPlaybackInterval() {
     if (this.playbackInterval) clearInterval(this.playbackInterval);
 
+    // ✅ START FRAME SUPPORT
+    this.currentFrame = (parseInt(this.startFrameInput?.value) - 1) || 0;
+
     this.playbackInterval = setInterval(() => {
       if (this.frames.length === 0) return;
-      this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+
       this.drawFrame(this.currentFrame);
       this.selectFrame(this.currentFrame);
+
+      this.currentFrame++;
+
+      if (this.currentFrame >= this.frames.length) {
+        if (this.loop) {
+          this.currentFrame = 0;
+        } else {
+          this.pause();
+        }
+      }
+
     }, this.frameDuration);
   }
 
@@ -107,7 +145,6 @@ export class SpriteAnimator {
         img.onload = () => {
           let newFrames;
 
-          // ✅ CHANGED HERE
           const fw = this.getFrameWidth();
           const fh = this.getFrameHeight();
 
@@ -132,6 +169,19 @@ export class SpriteAnimator {
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  // ✅ RESET FUNCTION
+  reset() {
+    this.frames = [];
+    this.currentFrame = 0;
+    this.selectedIndex = -1;
+
+    this.pause();
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.frameList.innerHTML = "";
+    this.dispatchFramesUpdated();
   }
 
   updateImageInfoDisplay(file, img) {
