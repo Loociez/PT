@@ -9,6 +9,7 @@ export class SpriteAnimator {
     this.playbackInterval = null;
     this.frameDuration = 200;
     this.selectedIndex = -1;
+	this.selectedFrames = new Set();
 
     this.backgroundColor = "#ffffff";
     this.showGrid = false;
@@ -42,10 +43,27 @@ export class SpriteAnimator {
     });
 
     this.frameList.addEventListener("click", (e) => {
-      if (e.target.tagName === "LI") {
-        this.selectFrame(parseInt(e.target.dataset.index));
-      }
-    });
+  if (e.target.tagName !== "LI") return;
+
+  const index = parseInt(e.target.dataset.index);
+
+  // CTRL / CMD multi-select
+  if (e.ctrlKey || e.metaKey) {
+    if (this.selectedFrames.has(index)) {
+      this.selectedFrames.delete(index);
+    } else {
+      this.selectedFrames.add(index);
+    }
+  } else {
+    // normal click = single select
+    this.selectedFrames.clear();
+    this.selectedFrames.add(index);
+  }
+
+  this.selectedIndex = index;
+  this.drawFrame(index);
+  this.updateFrameListUI();
+});
 
     this.setupBackgroundColorPicker();
     this.setupGridToggle();
@@ -176,6 +194,7 @@ export class SpriteAnimator {
     this.frames = [];
     this.currentFrame = 0;
     this.selectedIndex = -1;
+	this.selectedFrames.clear();
 
     this.pause();
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -300,72 +319,95 @@ export class SpriteAnimator {
   }
 
   updateFrameList() {
-    this.frameList.innerHTML = "";
-    this.frames.forEach((frame, i) => {
-      const li = document.createElement("li");
-      li.textContent = `Frame ${i + 1}`;
-      li.dataset.index = i;
-      if (i === this.selectedIndex) li.classList.add("selected");
-      this.frameList.appendChild(li);
-    });
-    document.getElementById("removeFrameBtn").disabled = this.selectedIndex === -1;
-    this.dispatchFramesUpdated();
-  }
+  this.frameList.innerHTML = "";
 
+  this.frames.forEach((frame, i) => {
+    const li = document.createElement("li");
+    li.textContent = `Frame ${i + 1}`;
+    li.dataset.index = i;
+
+    if (this.selectedFrames.has(i)) {
+      li.classList.add("selected");
+    }
+
+    this.frameList.appendChild(li);
+  });
+
+  document.getElementById("removeFrameBtn").disabled = this.selectedFrames.size === 0;
+  this.dispatchFramesUpdated();
+}
+updateFrameListUI() {
+  [...this.frameList.children].forEach((li, i) => {
+    li.classList.toggle("selected", this.selectedFrames.has(i));
+  });
+
+  document.getElementById("removeFrameBtn").disabled = this.selectedFrames.size === 0;
+}
   selectFrame(index) {
     if (index < 0 || index >= this.frames.length) return;
     this.selectedIndex = index;
     this.drawFrame(index);
-    [...this.frameList.children].forEach((li, i) => {
-      li.classList.toggle("selected", i === index);
-    });
+    selectFrame(index) {
+  if (index < 0 || index >= this.frames.length) return;
+
+  this.selectedIndex = index;
+  this.drawFrame(index);
+
+  // DO NOT override multi-select
+  this.updateFrameListUI();
+}
     document.getElementById("removeFrameBtn").disabled = false;
   }
 
-  removeSelectedFrame() {
-    if (this.selectedIndex === -1) return;
+ removeSelectedFrame() {
+  if (this.selectedFrames.size === 0) return;
 
-    this.frames.splice(this.selectedIndex, 1);
+  // remove from highest index → lowest (avoids shifting issues)
+  const sorted = [...this.selectedFrames].sort((a, b) => b - a);
 
-    if (this.frames.length === 0) {
-      this.selectedIndex = -1;
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    } else {
-      this.selectedIndex = Math.min(this.selectedIndex, this.frames.length - 1);
-      this.drawFrame(this.selectedIndex);
-    }
-
-    this.updateFrameList();
+  for (const index of sorted) {
+    this.frames.splice(index, 1);
   }
+
+  this.selectedFrames.clear();
+  this.selectedIndex = -1;
+
+  if (this.frames.length > 0) {
+    this.selectFrame(0);
+  } else {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  this.updateFrameList();
+}
 
   exportSpriteSheet() {
-    if (this.frames.length === 0) return;
-    const frameWidth = this.frames[0].width;
-    const frameHeight = this.frames[0].height;
-    const cols = this.frames.length;
+  if (this.selectedFrames.size === 0) return;
 
-    const sheetCanvas = document.createElement("canvas");
-    sheetCanvas.width = frameWidth * cols;
-    sheetCanvas.height = frameHeight;
-    const sheetCtx = sheetCanvas.getContext("2d");
+  const selected = [...this.selectedFrames];
+  const frameWidth = this.frames[0].width;
+  const frameHeight = this.frames[0].height;
 
-    for (let i = 0; i < this.frames.length; i++) {
-      sheetCtx.drawImage(this.frames[i], i * frameWidth, 0);
-    }
+  const cols = selected.length;
 
-    sheetCanvas.toBlob((blob) => {
-      if (!blob) {
-        alert("Error exporting sprite sheet.");
-        return;
-      }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "sprite_sheet.png";
-      a.click();
-      URL.revokeObjectURL(url);
-    }, "image/png");
-  }
+  const sheetCanvas = document.createElement("canvas");
+  sheetCanvas.width = frameWidth * cols;
+  sheetCanvas.height = frameHeight;
+  const sheetCtx = sheetCanvas.getContext("2d");
+
+  selected.forEach((frameIndex, i) => {
+    sheetCtx.drawImage(this.frames[frameIndex], i * frameWidth, 0);
+  });
+
+  sheetCanvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "selected_spritesheet.png";
+    a.click();
+    URL.revokeObjectURL(url);
+  }, "image/png");
+}
 
   exportFramesIndividually() {
     if (this.frames.length === 0) return;
@@ -379,7 +421,8 @@ export class SpriteAnimator {
     const preserveTransparency = document.getElementById("preserveTransparencyCheckbox")?.checked;
     const backgroundColor = document.getElementById("backgroundColorPicker")?.value || "#ffffff";
 
-    this.frames.forEach((frameCanvas, index) => {
+    [...this.selectedFrames].forEach((index, i) => {
+  const frameCanvas = this.frames[index];
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = frameCanvas.width;
       tempCanvas.height = frameCanvas.height;
