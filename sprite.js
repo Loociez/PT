@@ -1,4 +1,4 @@
-export class SpriteAnimator {
+class SpriteAnimator {
   constructor(canvasId, frameListId) {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext("2d");
@@ -353,11 +353,10 @@ updateFrameListUI() {
   this.selectedIndex = index;
   this.drawFrame(index);
 
-  //  multi-select
+  // DO NOT override multi-select
   this.updateFrameListUI();
 }
-    document.getElementById("removeFrameBtn").disabled = false;
-  }
+
 
  removeSelectedFrame() {
   if (this.selectedFrames.size === 0) return;

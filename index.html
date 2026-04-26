@@ -30,6 +30,7 @@
       width: 200px;
       height: auto;
     }
+
     .logo-container {
       display: flex;
       justify-content: center;
@@ -137,11 +138,6 @@
       color: white;
       font-weight: bold;
     }
-ul#frameList li.active {
-  outline: 2px solid #00ffcc;
-  background: #003a3a;
-  color: #fff;
-}
   </style>
 </head>
 <body>
@@ -214,15 +210,10 @@ ul#frameList li.active {
     const rotateBtn = document.getElementById("rotateBtn");
 
     function updateExportButtons(framesCount) {
-  const hasSelection =
-    window.animator &&
-    window.animator.selectedFrames &&
-    window.animator.selectedFrames.size > 0;
-
-  exportSheetBtn.disabled = !hasSelection;
-  exportFramesZipBtn.disabled = !hasSelection;
-  rotateBtn.disabled = !hasSelection;
-}
+      exportSheetBtn.disabled = framesCount === 0;
+      exportFramesZipBtn.disabled = framesCount === 0;
+      rotateBtn.disabled = framesCount === 0;
+    }
 
     document.addEventListener('framesUpdated', e => {
       updateExportButtons(e.detail.count);
