@@ -340,10 +340,13 @@ if (i === this.selectedIndex) {
   this.dispatchFramesUpdated();
 }
 updateFrameListUI() {
-  [...this.frameList.children].forEach((li, i) => {
+  const children = this.frameList.children;
+
+  for (let i = 0; i < children.length; i++) {
+    const li = children[i];
     li.classList.toggle("selected", this.selectedFrames.has(i));
-    li.classList.toggle("active", i === this.selectedIndex); 
-  });
+    li.classList.toggle("active", i === this.selectedIndex);
+  }
 
   document.getElementById("removeFrameBtn").disabled = this.selectedFrames.size === 0;
 }
@@ -362,7 +365,7 @@ updateFrameListUI() {
   if (this.selectedFrames.size === 0) return;
 
   // remove from highest index → lowest (avoids shifting issues)
-  const sorted = [...this.selectedFrames].sort((a, b) => b - a);
+  const sorted = Array.from(this.selectedFrames).sort((a, b) => b - a);
 
   for (const index of sorted) {
     this.frames.splice(index, 1);
