@@ -327,8 +327,11 @@ export class SpriteAnimator {
     li.dataset.index = i;
 
     if (this.selectedFrames.has(i)) {
-      li.classList.add("selected");
-    }
+  li.classList.add("selected");
+}
+if (i === this.selectedIndex) {
+  li.classList.add("active");
+}
 
     this.frameList.appendChild(li);
   });
@@ -339,6 +342,7 @@ export class SpriteAnimator {
 updateFrameListUI() {
   [...this.frameList.children].forEach((li, i) => {
     li.classList.toggle("selected", this.selectedFrames.has(i));
+    li.classList.toggle("active", i === this.selectedIndex); 
   });
 
   document.getElementById("removeFrameBtn").disabled = this.selectedFrames.size === 0;
@@ -484,7 +488,7 @@ updateFrameListUI() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  const animator = new SpriteAnimator("spriteCanvas", "frameList");
+  window.animator = new SpriteAnimator("spriteCanvas", "frameList");
 
   document.getElementById("upload")?.addEventListener("change", (e) => {
     animator.addFramesFromFiles(e.target.files);
