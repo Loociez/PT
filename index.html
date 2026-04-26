@@ -214,7 +214,10 @@ ul#frameList li.active {
     const rotateBtn = document.getElementById("rotateBtn");
 
     function updateExportButtons(framesCount) {
-  const hasSelection = window.animator?.selectedFrames?.size > 0;
+  const hasSelection =
+    window.animator &&
+    window.animator.selectedFrames &&
+    window.animator.selectedFrames.size > 0;
 
   exportSheetBtn.disabled = !hasSelection;
   exportFramesZipBtn.disabled = !hasSelection;
