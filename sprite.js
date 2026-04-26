@@ -348,16 +348,12 @@ updateFrameListUI() {
   document.getElementById("removeFrameBtn").disabled = this.selectedFrames.size === 0;
 }
   selectFrame(index) {
-    if (index < 0 || index >= this.frames.length) return;
-    this.selectedIndex = index;
-    this.drawFrame(index);
-    selectFrame(index) {
   if (index < 0 || index >= this.frames.length) return;
 
   this.selectedIndex = index;
   this.drawFrame(index);
 
-  // DO NOT override multi-select
+  //  multi-select
   this.updateFrameListUI();
 }
     document.getElementById("removeFrameBtn").disabled = false;
